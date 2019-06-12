@@ -4,3 +4,5 @@ QServer/QServer.pro.user
 QServer/QServer.pro.user.948a031.4.8-pre1
 QClient/QClient.pro.user.948a031.4.8-pre1
 QClient/QClient.pro.user
+!build-QServer-Desktop_Qt_5_12_2_MinGW_64_bit-Debug/debug/QServer.exe
+!build-QClient-Desktop_Qt_5_12_2_MinGW_64_bit-Debug/debug/QClient.exe

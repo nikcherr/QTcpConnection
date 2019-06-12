@@ -2,7 +2,7 @@
 
 Client::Client(QObject *parent)
 {
-
+    socket = new QTcpSocket(this);
 }
 
 PortValid Client::setPortNumber(const std::__cxx11::string &port)
@@ -27,6 +27,11 @@ Client::~Client()
     socket->close();
 }
 
+bool Client::isConnected()
+{
+    return socket->isOpen();
+}
+
 void Client::readData()
 {
     QByteArray data = socket->readAll();
@@ -36,9 +41,7 @@ void Client::set_address_port(const QString &address, const QString &port)
 {
     switch(setPortNumber(port.toStdString())){
     case PortValid::CORRECT:
-        socket = new QTcpSocket(this);
         connect(socket, SIGNAL(readyRead()), this, SLOT(readData()));
-
         socket->connectToHost(address, this->port);
         if(socket->waitForConnected(2000)){
             emit send_to_mainwindow("Connect to server.");

@@ -7,20 +7,24 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
     server = new MultiThreadServer(this);
+    settings = new QSettings("someServerOrganization", "someServerApplication", this);
+    serverPoint = new GeographicalPoint();
+    clientPoint = new GeographicalPoint();
+
     QObject::connect(this, SIGNAL(send_to_server(const QString&)), server, SLOT(run(const QString&)));
     QObject::connect(server, SIGNAL(send_to_mainwindow(const QString&)), this, SLOT(get_from_server(const QString&)));
     QObject::connect(server, SIGNAL(send_to_mainwindow_client_point(const QString&)), this, SLOT(get_client_point(const QString&)));
-    settings = new QSettings("someServerOrganization", "someServerApplication", this);
 
     scene = new QGraphicsScene();
     pointServer = new Point(0, 0);
+    pointClient = new Point();
+    lineToClient = new Line();
+
     ui->graphicsView->setScene(scene);
     ui->graphicsView->setRenderHint(QPainter::Antialiasing);
     ui->graphicsView->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     ui->graphicsView->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
-
     scene->setSceneRect(-250,-250,500,500);
-
     scene->addLine(-250,0,250,0,QPen(Qt::black));
     scene->addLine(0,-250,0,250,QPen(Qt::black));
     scene->addItem(pointServer);
@@ -37,8 +41,6 @@ MainWindow::~MainWindow()
 void MainWindow::on_pushButton_clicked()
 {
     emit send_to_server(ui->lineEdit->text());
-    serverPoint = new GeographicalPoint({ui->lat_degree->text().toInt(), ui->lat_minute->text().toInt(), ui->lat_second->text().toInt()},
-    {ui->long_degree->text().toInt(), ui->long_minute->text().toInt(), ui->long_second->text().toInt()});
 }
 
 void MainWindow::get_from_server(const QString& msg)
@@ -51,15 +53,61 @@ void MainWindow::get_client_point(const QString& msg)
     int index = msg.indexOf(" ");
     float latitude = msg.left(index).toFloat();
     float longitude = msg.mid(index).toFloat();
-    ui->textEdit->insertPlainText("Server coordinate N: " + QString::number(serverPoint->getLatitude()) + " E: "
-                                  + QString::number(serverPoint->getLongitude()) + "\n");
-    ui->textEdit->insertPlainText("Client coordinate N: " + QString::number(latitude) + " E: "
-                                  + QString::number(longitude) + "\n");
-    clientPoint = new GeographicalPoint(latitude, longitude);
-    ui->textEdit->insertPlainText("Distance: " + QString::number(Distance(*serverPoint, *clientPoint)) + "\n");
-    ui->textEdit->insertPlainText("Azimuth: " + QString::number(serverPoint->calculateAzimuth(*clientPoint)) + "\n\n");
+    clientPoint->changeLatitude(latitude);
+    clientPoint->changeLongitude(longitude);
+    renderAzimuth();
 }
 
+void MainWindow::renderAzimuth()
+{
+    if(serverPoint->isSet() && clientPoint->isSet()){
+        if(lineToClient != nullptr)
+            scene->removeItem(lineToClient);
+        float azimuth = serverPoint->calculateAzimuth(*clientPoint);
+        //ui->textEdit->insertPlainText("Distance: " + QString::number(Distance(*serverPoint, *clientPoint)) + "\n");
+        ui->textEdit->insertPlainText("Azimuth: " + QString::number(azimuth) + "\n");
+
+        lineToClient->setAzimuth(azimuth);
+        scene->addItem(lineToClient);
+        scene->addItem(pointClient);
+    }
+}
+
+void MainWindow::on_lat_degree_textChanged(const QString &arg1)
+{
+    serverPoint->changeLatitude({arg1.toInt(), ui->lat_minute->text().toInt(), ui->lat_second->text().toInt()});
+    renderAzimuth();
+}
+
+void MainWindow::on_lat_minute_textChanged(const QString &arg1)
+{
+    serverPoint->changeLatitude({ui->lat_degree->text().toInt(), arg1.toInt(), ui->lat_second->text().toInt()});
+    renderAzimuth();
+}
+
+void MainWindow::on_lat_second_textChanged(const QString &arg1)
+{
+    serverPoint->changeLatitude({ui->lat_degree->text().toInt(), ui->lat_minute->text().toInt(), arg1.toInt()});
+    renderAzimuth();
+}
+
+void MainWindow::on_long_degree_textChanged(const QString &arg1)
+{
+    serverPoint->changeLongitude({arg1.toInt(), ui->long_minute->text().toInt(), ui->long_second->text().toInt()});
+    renderAzimuth();
+}
+
+void MainWindow::on_long_minute_textChanged(const QString &arg1)
+{
+    serverPoint->changeLongitude({ui->long_degree->text().toInt(), arg1.toInt(), ui->long_second->text().toInt()});
+    renderAzimuth();
+}
+
+void MainWindow::on_long_second_textChanged(const QString &arg1)
+{
+    serverPoint->changeLongitude({ui->long_degree->text().toInt(), ui->long_minute->text().toInt(), arg1.toInt(),});
+    renderAzimuth();
+}
 
 void MainWindow::saveSettings()
 {
@@ -92,4 +140,3 @@ void MainWindow::loadSettings()
     ui->long_second->setText(settings->value("second", 20).toString());
     settings->endGroup();
 }
-

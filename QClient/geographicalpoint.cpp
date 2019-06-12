@@ -1,5 +1,7 @@
 #include "geographicalpoint.h"
 
+GeographicalPoint::GeographicalPoint(){}
+
 GeographicalPoint::GeographicalPoint(const float& latitude, const float& longitude)
     : latitude_(latitude), longitude_(longitude)
 {

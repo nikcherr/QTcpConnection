@@ -10,10 +10,12 @@ public:
     Coordinate(int degree, int minute, int second)
         : degree_(degree), minute_(minute), second_(second){}
     float getPoint() const {
-        return (float)degree_ + (float)minute_ / 60 + (float)second_ / 3600;
+        int sign = -1;
+        degree_ < 0 ? degree_ *= -1 : sign = 1;
+        return sign * ((float)degree_ + (float)minute_ / 60 + (float)second_ / 3600);
     }
 private:
-    int degree_ = 0;
+    mutable int degree_ = 0;
     int minute_ = 0;
     int second_ = 0;
 };
@@ -21,6 +23,7 @@ private:
 class GeographicalPoint
 {
 public:
+    GeographicalPoint();
     GeographicalPoint(const float& latitude, const float& longitude);
     GeographicalPoint(const Coordinate& latitude, const Coordinate& longitude);
 
@@ -29,9 +32,15 @@ public:
     float getRadLongitude() const;
     float getLatitude() const;
     float getLongitude() const;
+    void changeLatitude(const Coordinate& latitude);
+    void changeLongitude(const Coordinate& longitude);
+    void changeLatitude(float latitude);
+    void changeLongitude(float longitude);
+    bool isSet();
 
 private:
     float latitude_, longitude_;
+    bool setCoordinate = false;
 
 };
 

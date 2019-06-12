@@ -3,9 +3,10 @@
 Point::Point(int x, int y)
     : xpos(x), ypos(y)
 
-{
-
+{   
 }
+
+Point::Point(){ }
 
 QRectF Point::boundingRect() const
 {
@@ -20,3 +21,10 @@ void Point::paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWi
     Q_UNUSED(option);
     Q_UNUSED(widget);
 }
+
+void Point::setPosition(int x, int y)
+{
+    xpos = x;
+    ypos = y;
+}
+

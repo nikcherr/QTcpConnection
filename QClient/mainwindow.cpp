@@ -6,16 +6,15 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    settings = new QSettings("someClientOrganization", "someClientApplication", this);
-    loadSettings();
-
     tcpClient = new Client();
-    clientPoint = new GeographicalPoint({ui->lat_degree->text().toInt(), ui->lat_minute->text().toInt(), ui->lat_second->text().toInt()},
-                                        {ui->long_degree->text().toInt(), ui->long_minute->text().toInt(), ui->long_second->text().toInt()});
+    clientPoint = new GeographicalPoint();
 
     QObject::connect(tcpClient, SIGNAL(send_to_mainwindow(const QString&)), this, SLOT(get_message_from_client(const QString&)));
     QObject::connect(this, SIGNAL(send_address_port(const QString&, const QString&)), tcpClient, SLOT(set_address_port(const QString&, const QString&)));
     QObject::connect(this, SIGNAL(send_data_to_socket(const GeographicalPoint&)), tcpClient, SLOT(write_data_to_socket(const GeographicalPoint&)));
+
+    settings = new QSettings("someClientOrganization", "someClientApplication", this);
+    loadSettings();
 }
 
 MainWindow::~MainWindow()
@@ -33,38 +32,6 @@ void MainWindow::on_pushButton_clicked()
 void MainWindow::get_message_from_client(const QString &msg)
 {
     ui->textEdit->insertPlainText(msg + '\n');
-}
-
-void MainWindow::on_lat_degree_returnPressed()
-{
-    clientPoint->changeLatitude({ui->lat_degree->text().toInt(), ui->lat_minute->text().toInt(), ui->lat_second->text().toInt()});
-    emit send_data_to_socket(*clientPoint);
-}
-
-void MainWindow::on_lat_minute_returnPressed()
-{
-    emit on_lat_degree_returnPressed();
-}
-
-void MainWindow::on_lat_second_returnPressed()
-{
-    emit on_lat_degree_returnPressed();
-}
-
-void MainWindow::on_long_degree_returnPressed()
-{
-    clientPoint->changeLongitude({ui->long_degree->text().toInt(), ui->long_minute->text().toInt(), ui->long_second->text().toInt()});
-    emit send_data_to_socket(*clientPoint);
-}
-
-void MainWindow::on_long_minute_returnPressed()
-{
-    emit on_long_degree_returnPressed();
-}
-
-void MainWindow::on_long_second_returnPressed()
-{
-    emit on_long_degree_returnPressed();
 }
 
 void MainWindow::saveSettings()
@@ -99,4 +66,46 @@ void MainWindow::loadSettings()
     ui->long_minute->setText(settings->value("minute", 0).toString());
     ui->long_second->setText(settings->value("second", 0).toString());
     settings->endGroup();
+}
+
+void MainWindow::on_lat_degree_textChanged(const QString &arg1)
+{
+    clientPoint->changeLatitude({arg1.toInt(), ui->lat_minute->text().toInt(), ui->lat_second->text().toInt()});
+    if(tcpClient->isConnected())
+        emit send_data_to_socket(*clientPoint);
+}
+
+void MainWindow::on_lat_minute_textChanged(const QString &arg1)
+{
+    clientPoint->changeLatitude({ui->lat_degree->text().toInt(), arg1.toInt(), ui->lat_second->text().toInt()});
+    if(tcpClient->isConnected())
+        emit send_data_to_socket(*clientPoint);
+}
+
+void MainWindow::on_lat_second_textChanged(const QString &arg1)
+{
+    clientPoint->changeLatitude({ui->lat_degree->text().toInt(), ui->lat_minute->text().toInt(), arg1.toInt()});
+    if(tcpClient->isConnected())
+        emit send_data_to_socket(*clientPoint);
+}
+
+void MainWindow::on_long_degree_textChanged(const QString &arg1)
+{
+    clientPoint->changeLongitude({arg1.toInt(), ui->long_minute->text().toInt(), ui->long_second->text().toInt()});
+    if(tcpClient->isConnected())
+        emit send_data_to_socket(*clientPoint);
+}
+
+void MainWindow::on_long_minute_textChanged(const QString &arg1)
+{
+    clientPoint->changeLongitude({ui->long_degree->text().toInt(), arg1.toInt(), ui->long_second->text().toInt()});
+    if(tcpClient->isConnected())
+        emit send_data_to_socket(*clientPoint);
+}
+
+void MainWindow::on_long_second_textChanged(const QString &arg1)
+{
+    clientPoint->changeLongitude({ui->long_degree->text().toInt(), ui->long_minute->text().toInt(), arg1.toInt()});
+    if(tcpClient->isConnected())
+        emit send_data_to_socket(*clientPoint);
 }

@@ -20,6 +20,7 @@ private:
 class GeographicalPoint
 {
 public:
+    GeographicalPoint();
     GeographicalPoint(const float& latitude, const float& longitude);
     GeographicalPoint(const Coordinate& latitude, const Coordinate& longitude);
 

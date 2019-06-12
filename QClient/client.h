@@ -16,6 +16,7 @@ public:
     Client(QObject* parent = nullptr);
     PortValid setPortNumber(const std::string& port);
     ~Client();
+    bool isConnected();
 
 public slots:
     void readData();

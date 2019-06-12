@@ -30,14 +30,16 @@ SOURCES += \
         mainwindow.cpp \
         multithreadserver.cpp \
         socketthread.cpp \
-    point.cpp
+    point.cpp \
+    line.cpp
 
 HEADERS += \
         geographicalpoint.h \
         mainwindow.h \
         multithreadserver.h \
         socketthread.h \
-    point.h
+    point.h \
+    line.h
 
 FORMS += \
         mainwindow.ui

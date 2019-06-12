@@ -1,5 +1,10 @@
 #include "geographicalpoint.h"
 
+GeographicalPoint::GeographicalPoint()
+{
+
+}
+
 GeographicalPoint::GeographicalPoint(const float& latitude, const float& longitude)
     : latitude_(latitude), longitude_(longitude)
 {
@@ -45,6 +50,35 @@ float GeographicalPoint::getLatitude() const
     return latitude_;
 }
 
+void GeographicalPoint::changeLatitude(const Coordinate &latitude)
+{
+    latitude_ = latitude.getPoint();
+    setCoordinate = true;
+}
+
+void GeographicalPoint::changeLongitude(const Coordinate &longitude)
+{
+    longitude_ = longitude.getPoint();
+    setCoordinate = true;
+}
+
+void GeographicalPoint::changeLatitude(float latitude)
+{
+    latitude_ = latitude;
+    setCoordinate = true;
+}
+
+void GeographicalPoint::changeLongitude(float longitude)
+{
+    longitude_ = longitude;
+    setCoordinate = true;
+}
+
+bool GeographicalPoint::isSet()
+{
+    return setCoordinate;
+}
+
 float Distance(const GeographicalPoint& rhs, const GeographicalPoint& lhs)
 {
     float lat_rhs = rhs.getRadLatitude();
@@ -53,5 +87,4 @@ float Distance(const GeographicalPoint& rhs, const GeographicalPoint& lhs)
     float long_lhs = lhs.getRadLongitude();
     float delta = long_rhs - long_lhs;
     return R * (acosf(sinf(lat_rhs) * sinf(lat_lhs) + cosf(lat_rhs) * cosf(lat_lhs) * cosf(delta)));
-
 }
